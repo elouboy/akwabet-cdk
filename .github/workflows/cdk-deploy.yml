@@ -1,0 +1,95 @@
+# This workflow handles the testing and deployment process for a CDK application
+name: CDK Deployment
+
+# Define the events that trigger this workflow
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]  # Trigger on closed PRs to main branch
+  workflow_dispatch:  # Allow manual triggers
+    inputs:
+      environment:
+        description: 'Environment to deploy to (dev)'
+        required: true
+        default: 'dev'
+
+# Define environment variables
+env:
+  DEV_AWS_REGION: 'us-east-1' # AWS region for dev
+
+jobs:
+  test-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    # Step 1: Check out the repository code
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    # Step 2: Set up Node.js environment
+    - name: Setup Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '20.x'
+
+    # Step 3: Install project dependencies
+    - name: Install dependencies
+      run: npm ci
+
+    # Step 4: Build TypeScript code
+    - name: Build TypeScript
+      run: npm run build
+
+    # Step 6: Set environment
+    - name: Set environment
+      run: |
+        if [[ "${{ github.event_name }}" == "pull_request" && "${{ github.event.pull_request.merged }}" == "true" && "${{ github.base_ref }}" == "main" ]]; then
+          echo "DEPLOY_ENV=DEV" >> $GITHUB_ENV
+          echo "AWS_REGION=${{ env.DEV_AWS_REGION }}" >> $GITHUB_ENV
+        elif [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ github.event.inputs.environment }}" == "dev" ]]; then
+          echo "DEPLOY_ENV=DEV" >> $GITHUB_ENV
+          echo "AWS_REGION=${{ env.DEV_AWS_REGION }}" >> $GITHUB_ENV
+        else
+          echo "No deployment will be performed."
+          exit 1
+        fi
+
+    # Step 7: Configure AWS credentials
+    - name: Configure AWS credentials
+      if: env.DEPLOY_ENV == 'DEV'
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AKWABET_DEV_AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AKWABET_DEV_AWS_SECRET_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    # Step 8: Deploy the CDK stack
+    - name: Deploy
+      if: success() && env.DEPLOY_ENV == 'DEV'
+      run: |
+        echo "Deploying to dev environment..."
+        npx cdk deploy --context environment=${{ env.DEPLOY_ENV }} --context aws_region=${{ env.AWS_REGION }} --require-approval never
+      shell: bash
+  
+    # Step 9: Install AWS CLI Session Manager plugin
+    - name: Install AWS CLI Session Manager plugin
+      if: success() && env.DEPLOY_ENV == 'DEV'
+      run: |
+        curl "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb" -o "session-manager-plugin.deb"
+        sudo dpkg -i session-manager-plugin.deb
+
+    # Step 10: Install jq
+    - name: Install jq
+      if: success() && env.DEPLOY_ENV == 'DEV'
+      run: sudo apt-get install -y jq
+
+    # Step 11: Run database migrations
+    - name: Run Database Migrations
+      if: success() && env.DEPLOY_ENV == 'DEV'
+      run: |
+        chmod +x ./db-migration-script.sh
+        ./db-migration-script.sh ${{ env.DEPLOY_ENV }} ${{ env.AWS_REGION }} akwabet-service
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AKWABET_DEV_AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AKWABET_DEV_AWS_SECRET_KEY }}
+      shell: bash
