@@ -13,7 +13,7 @@ interface BackOfficeLambdasProps {
   baseResource: apigateway.Resource;
   queueEnvironmentVariables?: QueueEnvironmentVariables;
   vpc: ec2.IVpc;
-  securityGroup: ec2.ISecurityGroup;
+  securityGroup: ec2.SecurityGroup;
 
 }
 
