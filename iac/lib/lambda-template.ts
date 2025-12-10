@@ -71,8 +71,7 @@ export class LambdaTemplate extends Construct {
       layers: layers.length > 0 ? layers : undefined,
       vpc: props.vpc,
       memorySize: props.memorySize || 512,
-      vpcSubnets: props.vpcSubnets || { subnetType: ec2.SubnetType.PUBLIC },
-      allowPublicSubnet: true,
+      vpcSubnets: props.vpcSubnets || { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
       securityGroups: [props.securityGroup],
       logRetention: props.logRetention || logs.RetentionDays.FIVE_DAYS, 
     });
