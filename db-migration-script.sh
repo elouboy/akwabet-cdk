@@ -19,7 +19,7 @@ fi
 
 if [ -z "$3" ]; then
     echo "Usage: $1 $2 <db_prefix>"
-    echo "For players service database use: players-service"
+    echo "For akwabet service database use: akwabet-service"
     exit 1
 fi
 
