@@ -5,6 +5,7 @@ import { BaseApiStack } from './base-api-stack';
 import { NetworkStack } from './network-stack';
 import { BackofficeLambdasStack } from './backoffice-lambdas-stack';
 import { DatabaseStack } from './database-stack';
+import { StorageStack } from './storage-stack';
 
 
 export class AkwabetLambdasStack extends cdk.Stack {
@@ -23,6 +24,9 @@ export class AkwabetLambdasStack extends cdk.Stack {
       vpc: networkStack.vpc,
       securityGroup: networkStack.customSecurityGroup,
     });
+
+    // Storage Stack
+    const storageStack = new StorageStack(this, CdkUtils.formatId(this, 'StorageStack'), {});
 
     
 
@@ -44,9 +48,19 @@ export class AkwabetLambdasStack extends cdk.Stack {
     };
     
     new BackofficeLambdasStack(this, `BackofficeApiStack-${environment}`, backofficeSharedProps);
+
+    // Outputs
+    this.createOutputs(storageStack);
     
   }
 
+  private createOutputs(storageStack: StorageStack) {
+    
+    new cdk.CfnOutput(this, 'CloudFrontDistributionDomainName', {
+      value: storageStack.distribution.distributionDomainName,
+      description: 'Domain name of the CloudFront distribution',
+    });
 
+  }
 
   }
