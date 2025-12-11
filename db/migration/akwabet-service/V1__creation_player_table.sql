@@ -2,5 +2,5 @@ CREATE TABLE IF NOT EXISTS player (
     id SERIAL PRIMARY KEY,
     player_id VARCHAR(255) NOT NULL,
     wallet VARCHAR(255) NOT NULL,
-    msisdn VARCHAR(255) NOT NULL ,
+    msisdn VARCHAR(255) NOT NULL
 );
