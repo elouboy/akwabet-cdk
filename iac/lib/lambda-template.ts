@@ -7,8 +7,8 @@ import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as logs from 'aws-cdk-lib/aws-logs';
 import { S3EventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import * as path from 'path';
-import { CdkUtils } from './cdk-utils';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
+import { CdkUtils } from './cdk-utils';
 
 export interface LambdaTemplateProps {
   baseName?: string;
@@ -73,7 +73,7 @@ export class LambdaTemplate extends Construct {
       memorySize: props.memorySize || 512,
       vpcSubnets: props.vpcSubnets || { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
       securityGroups: [props.securityGroup],
-      logRetention: props.logRetention || logs.RetentionDays.FIVE_DAYS, 
+      logRetention: props.logRetention || logs.RetentionDays.ONE_WEEK, // Add log retention of 1 week
     });
 
     

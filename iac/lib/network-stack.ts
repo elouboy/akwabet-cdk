@@ -14,32 +14,8 @@ export class NetworkStack extends cdk.NestedStack {
   public readonly vpc: ec2.Vpc;
   public readonly customSecurityGroup: ec2.SecurityGroup;
   public readonly cluster: ecs.Cluster;
- /* public readonly queueEnvironmentVariables: QueueEnvironmentVariables = {};
+  public readonly queueEnvironmentVariables: QueueEnvironmentVariables = {};
 
-  public readonly transactionDebitRequestQueue: sqs.Queue;
-  public readonly walletUpdateRequestQueue: sqs.Queue;
-  public readonly transactionStatusUpdateQueue: sqs.Queue;
-  public readonly notificationSendQueue: sqs.Queue;
-
-  public readonly debitRequestTrxWalletQueue: sqs.Queue;
-  public readonly debitResponseTrxWalletQueue: sqs.Queue;
-  public readonly creditRequestTrxWalletQueue: sqs.Queue;
-  public readonly creditResponseTrxWalletQueue: sqs.Queue;
-  public readonly mmDebitRequestTrxOpQueue: sqs.Queue;
-  public readonly mmResponseTrxOpQueue: sqs.Queue;
-  public readonly balanceUpdateTrxWwalletQueue: sqs.Queue;
-  public readonly serviceExecRequestTrxLebedooQueue: sqs.Queue;
-  public readonly refundRequestTrxWalletQueue: sqs.Queue;
-  public readonly refundResponseTrxWalletQueue: sqs.Queue;
-  public readonly paymentValidationOpTrxQueue: sqs.Queue;
-
-  public readonly plafondRequestCheckerQueue: sqs.Queue;
-
-  public readonly serviceExterneQueue: sqs.Queue;
-
-  public readonly unsubscribeUserQueue: sqs.Queue;
-
-  public readonly mercureQueue: sqs.Queue;*/
 
   
 
@@ -126,11 +102,11 @@ export class NetworkStack extends cdk.NestedStack {
     this.mercureQueue = this.createQueueWithDLQ('MercureQueue', 'mercure', false);;*/
 
     // Create or get existing ECS cluster
-    this.cluster = new ecs.Cluster(this, CdkUtils.formatId(this, 'AkwabetServers'), {
+    /*this.cluster = new ecs.Cluster(this, CdkUtils.formatId(this, 'AkwabetServers'), {
       vpc: this.vpc,
       clusterName: CdkUtils.formatId(this, 'AkwabetServers'),
       containerInsights: true,
-    });
+    });*/
 
     // Export VPC details
     new cdk.CfnOutput(this, 'VpcId', {
@@ -162,22 +138,22 @@ export class NetworkStack extends cdk.NestedStack {
     });
 
     // Export ECS Cluster details
-    new cdk.CfnOutput(this, 'EcsClusterArn', {
+    /*new cdk.CfnOutput(this, 'EcsClusterArn', {
       value: this.cluster.clusterArn,
       description: 'ECS Cluster ARN',
       exportName: `akwabet-${environment}-ecs-cluster-arn`,
-    });
+    });*/
 
-    new cdk.CfnOutput(this, 'EcsClusterName', {
+    /*new cdk.CfnOutput(this, 'EcsClusterName', {
       value: this.cluster.clusterName,
       description: 'ECS Cluster Name',
       exportName: `akwabet-${environment}-ecs-cluster-name`,
-    });
+    });*/
 
     // Store infrastructure details in SSM Parameter Store for easy lookup
     CdkUtils.createSsmParameter(this, 'vpc-id', this.vpc.vpcId);
     CdkUtils.createSsmParameter(this, 'security-group-id', this.customSecurityGroup.securityGroupId);
-    CdkUtils.createSsmParameter(this, 'ecs-cluster-name', this.cluster.clusterName);
+    /*CdkUtils.createSsmParameter(this, 'ecs-cluster-name', this.cluster.clusterName);*/
   }
 
   private addVpcEndpoints() {

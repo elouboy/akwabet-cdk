@@ -6,9 +6,8 @@ import { CdkUtils } from './cdk-utils';
 interface BaseApiStackProps extends cdk.NestedStackProps {
   environment: string;
   apiName: string;  // Name of the API (e.g., 'backoffice', 'user')
-  basePath?: string; // Base path for the API (e.g., 'Elfa')
+  basePath?: string; // Base path for the API (e.g., 'fantasycore')
   subBasePath: string; // Sub Base path for the API (e.g., 'backoffice', 'user')
-  projectName: string; // Project name (e.g., 'Elfa')
 }
 
 export class BaseApiStack extends cdk.NestedStack {
@@ -22,9 +21,9 @@ export class BaseApiStack extends cdk.NestedStack {
     const environment = CdkUtils.getEnvironment(this);
     const basePath = props.basePath || CdkUtils.AKWABET;
 
-    this.api = new apigateway.RestApi(this, CdkUtils.formatId(this, `${props.projectName}${props.apiName}Api`), {
-      restApiName: `${props.projectName}-${props.apiName.toLowerCase()}-api-${environment}`,
-      description: `API Gateway for ${props.projectName} ${props.apiName.toLowerCase()} services`,
+    this.api = new apigateway.RestApi(this, CdkUtils.formatId(this, `Akwabet${props.apiName}Api`), {
+      restApiName: `akwabet-${props.apiName.toLowerCase()}-api-${environment}`,
+      description: `API Gateway for akwabet ${props.apiName.toLowerCase()} services`,
       deployOptions: {
         stageName: environment
       },

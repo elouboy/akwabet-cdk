@@ -35,19 +35,19 @@ export class AkwabetLambdasStack extends cdk.Stack {
       environment: environment,
       apiName: 'Backoffice',
       subBasePath: 'backoffice',
-      projectName: 'Akwabet'
     });
 
 
-    const backofficeSharedProps = {
+    const backOfficeSharedProps = {
       environment: environment,
-      apiGateway: backofficeApiStack.api,
       vpc: networkStack.vpc,
       securityGroup: networkStack.customSecurityGroup,
+      apiGateway: backofficeApiStack.api,
       baseResource: backofficeApiStack.subBaseResource,
+      queueEnvironmentVariables: networkStack.queueEnvironmentVariables
     };
     
-    new BackofficeLambdasStack(this, `BackofficeApiStack-${environment}`, backofficeSharedProps);
+    new BackofficeLambdasStack(this, `BackofficeApiStack-${environment}`, backOfficeSharedProps);
 
     // Outputs
     this.createOutputs(storageStack);
