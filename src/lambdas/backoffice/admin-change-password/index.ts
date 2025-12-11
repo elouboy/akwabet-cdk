@@ -35,7 +35,7 @@ export const handler: any = async (event: any) => {
     await cognito.adminSetUserPassword(params);
     // Update user attributes to set email_verified to true
     const updateParams: AdminUpdateUserAttributesCommandInput = {
-      UserPoolId: 'us-east-1_7M1Okv9XY',
+      UserPoolId: 'us-east-1_jOx4Azwve',
       Username: email,
       UserAttributes: [
         {
