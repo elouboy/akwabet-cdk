@@ -28,7 +28,7 @@ export class NetworkStack extends cdk.NestedStack {
     // Creating VPC
     this.vpc = new ec2.Vpc(this, 'AkwabetVPC', {
       maxAzs: 2,
-      natGateways: 0,
+      natGateways: 1,
       subnetConfiguration: [
         {
           cidrMask: 24,
