@@ -74,30 +74,38 @@ echo "Uploaded migration scripts to S3: s3://$S3_BUCKET/$S3_PREFIX"
 # Construct the SSM command to download scripts and run Flyway
 SSM_COMMAND=$(cat << EOF
 #!/bin/bash
-set -e
+set -euo pipefail
+trap 'echo "Error on line \$LINENO"; exit 1' ERR
+set -x
 
 # Install or update Flyway
 install_or_update_flyway() {
-    
-    if ! command -v flyway &> /dev/null; then
-        export FLYWAY_VERSION="10.18.0"  # Specify the version you want to use
-        echo "Flyway not found. Installing Flyway..."
-        wget https://repo1.maven.org/maven2/org/flywaydb/flyway-commandline/10.18.0/flyway-commandline-10.18.0-linux-x64.tar.gz
-        tar -xvzf flyway-commandline-10.18.0-linux-x64.tar.gz
-        sudo mv flyway-10.18.0 /opt/flyway
-        sudo ln -s /opt/flyway/flyway /usr/local/bin/flyway
-        sudo rm -rf flyway-*
+    FLYWAY_VERSION="10.18.0"
+    CURRENT_VER=\$(command -v flyway && flyway -v 2>/dev/null | head -1 | awk '{print \$2}') || true
+
+    if [ "\$CURRENT_VER" = "\$FLYWAY_VERSION" ]; then
+        echo "Flyway \$CURRENT_VER already installed"
+        return
     fi
+
+    echo "Installing Flyway \$FLYWAY_VERSION (current: \${CURRENT_VER:-none})"
+    TMP_TGZ="/tmp/flyway-\${FLYWAY_VERSION}.tar.gz"
+    curl -L --retry 5 --retry-delay 2 -o "\$TMP_TGZ" "https://repo1.maven.org/maven2/org/flywaydb/flyway-commandline/\${FLYWAY_VERSION}/flyway-commandline-\${FLYWAY_VERSION}-linux-x64.tar.gz"
+    tar -xzf "\$TMP_TGZ" -C /tmp
+    sudo rm -rf /opt/flyway
+    sudo mv "/tmp/flyway-\${FLYWAY_VERSION}" /opt/flyway
+    sudo ln -sf /opt/flyway/flyway /usr/local/bin/flyway
+    rm -f "\$TMP_TGZ"
 }
 
 # Install or update Flyway
 install_or_update_flyway
 
 # Create migrations directory
-mkdir -p $TEMP_DIR
+WORK_DIR=\$(mktemp -d /tmp/flyway-mig-XXXXXX)
 
 # Download migration scripts from S3
-aws s3 sync s3://$S3_BUCKET/$S3_PREFIX $TEMP_DIR --region $REGION
+aws s3 sync s3://$S3_BUCKET/$S3_PREFIX \$WORK_DIR --region $REGION
 
 # Function to run Flyway command
 run_flyway_command() {
@@ -106,7 +114,7 @@ run_flyway_command() {
     flyway -url="jdbc:postgresql://$DB_PROXY_ENDPOINT:5432/$RDS_DB_NAME" \
            -user="$DB_USERNAME" \
            -password="$DB_PASSWORD" \
-           -locations="filesystem:$TEMP_DIR" \
+           -locations="filesystem:\$WORK_DIR" \
            "\$command"
 }
 
@@ -117,7 +125,7 @@ run_flyway_command "migrate"
 run_flyway_command "info"
 echo "Database migration completed successfully!"
 
-sudo rm -rf "$TEMP_DIR"
+sudo rm -rf "\$WORK_DIR"
 
 EOF
 )
