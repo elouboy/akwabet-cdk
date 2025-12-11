@@ -42,7 +42,7 @@ export const handler = async (event: any): Promise<any> => {
 
         // Create user in Cognito
         const params: AdminCreateUserCommandInput = {
-            UserPoolId: 'us-east-1_7M1Okv9XY',
+            UserPoolId: 'us-east-1_jOx4Azwve',
             Username: email,
             TemporaryPassword: password,
             UserAttributes: [
