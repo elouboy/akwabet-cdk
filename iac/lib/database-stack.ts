@@ -67,7 +67,7 @@ export class DatabaseStack extends cdk.NestedStack {
     // RDS instance
     // TODO: For Prod - aurora postgresql the meduim one
     const  akwabetServiceRdsInstance = new rds.DatabaseInstance(this, CdkUtils.formatId(this, 'AkwabetServiceRDSInstance'), {
-      engine: rds.DatabaseInstanceEngine.postgres({ version: rds.PostgresEngineVersion.VER_13 }),
+      engine: rds.DatabaseInstanceEngine.postgres({ version: rds.PostgresEngineVersion.VER_16 }),
       instanceType: this.akwabetServiceDB.instanceType,
       vpc: props.vpc,
       vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
@@ -79,7 +79,8 @@ export class DatabaseStack extends cdk.NestedStack {
       deletionProtection: true,
       removalPolicy: cdk.RemovalPolicy.SNAPSHOT,
       publiclyAccessible: false,
-      allocatedStorage: this.akwabetServiceDB.allocatedStorage!
+      allocatedStorage: this.akwabetServiceDB.allocatedStorage!,
+      allowMajorVersionUpgrade: true,
     });
 
     // RDS Proxy
