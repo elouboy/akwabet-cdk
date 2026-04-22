@@ -141,6 +141,6 @@ CREATE TABLE summary_report (
 -- 10. INDICES DE PERFORMANCE
 CREATE INDEX idx_wallet_transaction_user_id ON wallet_transaction(user_id);
 CREATE INDEX idx_wallet_transaction_type ON wallet_transaction(type);
-CREATE INDEX idx_wallet_transaction_event_timestamp ON wallet_transaction(event_timestamp);
-CREATE INDEX idx_bet_player_id ON bet(player_id);
-CREATE INDEX idx_bet_date_of_stake ON bet(date_of_stake);
+CREATE INDEX idx_wallet_transaction_created_at ON wallet_transaction(created_at);
+CREATE INDEX idx_bet_user_id ON bet(user_id);
+CREATE INDEX idx_bet_event_timestamp ON bet(event_timestamp);
