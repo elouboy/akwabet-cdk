@@ -11,6 +11,7 @@ export class StorageStack extends cdk.NestedStack {
   public readonly staticContentBucket: s3.Bucket;
   public readonly dbMigrationBucket: s3.Bucket;
   public readonly tinyTuneAudiosBucket: s3.Bucket;
+  public readonly betLogsBucket: s3.Bucket;
   public readonly distribution: cloudfront.Distribution;
 
   constructor(scope: Construct, id: string, props?: cdk.NestedStackProps) {
@@ -36,6 +37,24 @@ export class StorageStack extends cdk.NestedStack {
           maxAge: 3000,
         },
       ]
+    });
+
+    // Create S3 bucket for accepted-bet logs (engine output)
+    this.betLogsBucket = new s3.Bucket(this, CdkUtils.formatId(this, 'BetLogsBucket'), {
+      bucketName: `akwabet-bet-logs-bkt-res-${environment.toLowerCase()}`,
+      encryption: s3.BucketEncryption.S3_MANAGED,
+      enforceSSL: true,
+      versioned: false,
+      accessControl: s3.BucketAccessControl.PRIVATE,
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+    });
+
+    CdkUtils.createSsmParameter(this, 'akwabet-service/bet-logs-bucket-name', this.betLogsBucket.bucketName);
+
+    new cdk.CfnOutput(this, 'BetLogsBucketName', {
+      value: this.betLogsBucket.bucketName,
+      description: 'Name of the S3 bucket for accepted-bet logs',
     });
 
     // Create S3 bucket for DB migration
